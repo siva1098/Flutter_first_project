@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -11,9 +14,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.indigo,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Pocket Dictionary'),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -27,39 +31,98 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  String _search = '';
+  String result = 'Enter a word..';
+  TextEditingController controller = TextEditingController();
 
-  void _incrementCounter() {
+  void _setSearch() async {
     setState(() {
-      _counter++;
+      _search = controller.text;
+    });
+  }
+
+  getResult() async {
+    String _result = '';
+    try {
+      var searchResult = await http.get(Uri.https(
+          "api.dictionaryapi.dev", "api/v2/entries/en/" + controller.text));
+      var jsonData = jsonDecode(searchResult.body);
+      print(searchResult.statusCode);
+      if (searchResult.statusCode != 404) {
+        _result = jsonData[0]['meanings'][0]['definitions'][0]['definition'];
+      } else {
+        _result = 'Word Not Found 😅';
+        print(_result);
+      }
+    } catch (e) {
+      print(e.toString());
+    }
+    setState(() {
+      result = _result;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unnecessary_const
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+      body: Container(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                    height: MediaQuery.of(context).size.height * 0.40,
+                    child: Image.asset('assets/love.png')),
+              ),
+              TextField(
+                controller: controller,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Search',
+                  hintText: 'Enter Your Search',
+                ),
+              ),
+              Padding(
+                  padding: const EdgeInsets.all(10.0),
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor:
+                          MaterialStateProperty.all<Color>(Colors.indigo),
+                    ),
+                    onPressed: () {
+                      getResult();
+                      // _setSearch();
+                    },
+                    child: const Text('Search'),
+                  )),
+              Card(
+                elevation: 3.0,
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                      child: Text(result,
+                          style: const TextStyle(
+                              fontSize: 20.0, fontWeight: FontWeight.bold))),
+                ),
+              )
+              //       Padding(
+              //   padding: EdgeInsets.all(8.0),
+              //   child: TextField(
+              //     maxLines: 8,
+              //     decoration: InputDecoration.collapsed(hintText: "Enter your text here"),
+              //   ),
+              // ),
+            ],
+          ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
