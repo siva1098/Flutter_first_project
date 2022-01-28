@@ -39,17 +39,19 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _search = controller.text;
     });
+    getResult();
   }
 
   getResult() async {
     String _result = '';
     try {
-      var searchResult = await http.get(Uri.https(
-          "api.dictionaryapi.dev", "api/v2/entries/en/" + controller.text));
+      var searchResult = await http.get(
+          Uri.https("api.dictionaryapi.dev", "api/v2/entries/en/" + _search));
       var jsonData = jsonDecode(searchResult.body);
-      print(searchResult.statusCode);
+      // print(searchResult.statusCode);
       if (searchResult.statusCode != 404) {
         _result = jsonData[0]['meanings'][0]['definitions'][0]['definition'];
+        print(_result);
       } else {
         _result = 'Word Not Found 😅';
         print(_result);
@@ -59,6 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     setState(() {
       result = _result;
+      _search = '';
     });
   }
 
@@ -69,58 +72,61 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Container(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                    height: MediaQuery.of(context).size.height * 0.40,
-                    child: Image.asset('assets/love.png')),
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.40,
+                  child: Image.asset('assets/love.png')),
+            ),
+            TextField(
+              controller: controller,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: 'Search',
+                hintText: 'Enter Your Search',
               ),
-              TextField(
-                controller: controller,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Search',
-                  hintText: 'Enter Your Search',
-                ),
-              ),
-              Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: ElevatedButton(
-                    style: ButtonStyle(
-                      backgroundColor:
-                          MaterialStateProperty.all<Color>(Colors.indigo),
+            ),
+            Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: ElevatedButton(
+                  style: ButtonStyle(
+                    shape: MaterialStateProperty.all(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(28.0),
+                      ),
                     ),
-                    onPressed: () {
-                      getResult();
-                      // _setSearch();
-                    },
-                    child: const Text('Search'),
-                  )),
-              Card(
-                elevation: 3.0,
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                      child: Text(result,
-                          style: const TextStyle(
-                              fontSize: 20.0, fontWeight: FontWeight.bold))),
-                ),
-              )
-              //       Padding(
-              //   padding: EdgeInsets.all(8.0),
-              //   child: TextField(
-              //     maxLines: 8,
-              //     decoration: InputDecoration.collapsed(hintText: "Enter your text here"),
-              //   ),
-              // ),
-            ],
-          ),
+                    backgroundColor:
+                        MaterialStateProperty.all<Color>(Colors.indigo),
+                  ),
+                  onPressed: () {
+                    _setSearch();
+                    // getResult();
+                  },
+                  child: const Text('Search'),
+                )),
+            Card(
+              elevation: 3.0,
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Center(
+                    child: Text(result,
+                        style: const TextStyle(
+                            fontSize: 20.0, fontWeight: FontWeight.bold))),
+              ),
+            )
+            //       Padding(
+            //   padding: EdgeInsets.all(8.0),
+            //   child: TextField(
+            //     maxLines: 8,
+            //     decoration: InputDecoration.collapsed(hintText: "Enter your text here"),
+            //   ),
+            // ),
+          ],
         ),
       ),
     );
