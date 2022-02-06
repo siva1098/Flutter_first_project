@@ -39,7 +39,11 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _search = controller.text;
     });
-    getResult();
+    if (_search != "") {
+      getResult();
+    } else {
+      result = 'Please Enter a Search word..';
+    }
   }
 
   getResult() async {
@@ -93,21 +97,14 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: ElevatedButton(
-                  style: ButtonStyle(
-                    shape: MaterialStateProperty.all(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28.0),
-                      ),
-                    ),
-                    backgroundColor:
-                        MaterialStateProperty.all<Color>(Colors.indigo),
-                  ),
+                child: IconButton(
+                  icon: Image.asset('assets/search.gif'),
+                  iconSize: 50,
                   onPressed: () {
                     _setSearch();
                     // getResult();
                   },
-                  child: const Text('Search'),
+                  tooltip: 'Search',
                 )),
             Card(
               elevation: 3.0,
@@ -118,7 +115,8 @@ class _MyHomePageState extends State<MyHomePage> {
                         style: const TextStyle(
                             fontSize: 20.0, fontWeight: FontWeight.bold))),
               ),
-            )
+            ),
+
             //       Padding(
             //   padding: EdgeInsets.all(8.0),
             //   child: TextField(
